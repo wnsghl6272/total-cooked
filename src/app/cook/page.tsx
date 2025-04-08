@@ -2,7 +2,6 @@
 
 import { useState, KeyboardEvent } from 'react';
 import Navbar from '@/components/Navbar';
-import Image from 'next/image';
 import IngredientInput from '@/components/IngredientInput';
 import ImageUpload from '@/components/ImageUpload';
 import RecipeSuggestions from '@/components/RecipeSuggestions';
