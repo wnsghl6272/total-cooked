@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --grapefruit: #FF6B6B;
+  --grapefruit-light: #FFE2E2;
+  --grapefruit-dark: #FF5252;
 }
 
 @theme inline {
@@ -23,4 +26,47 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% / 2));
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
+/* Pause animation on hover */
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Custom utility classes for grapefruit theme */
+.bg-grapefruit {
+  background-color: var(--grapefruit);
+}
+
+.bg-grapefruit-light {
+  background-color: var(--grapefruit-light);
+}
+
+.text-grapefruit {
+  color: var(--grapefruit);
+}
+
+.hover\:bg-grapefruit-dark:hover {
+  background-color: var(--grapefruit-dark);
+}
+
+.hover\:text-grapefruit:hover {
+  color: var(--grapefruit);
 }
