@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import IngredientInput from '@/components/IngredientInput';
