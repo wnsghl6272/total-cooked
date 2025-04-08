@@ -3,6 +3,13 @@ import { NextResponse } from 'next/server';
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
+type Recipe = {
+  id: number;
+  title: string;
+  image: string;
+  missedIngredientCount: number;
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const ingredients = searchParams.get('ingredients');
@@ -31,7 +38,7 @@ export async function GET(request: Request) {
 
     // Get additional recipe information for each recipe
     const recipeDetails = await Promise.all(
-      recipes.map(async (recipe: any) => {
+      recipes.map(async (recipe: Recipe) => {
         const detailResponse = await fetch(
           `${BASE_URL}/${recipe.id}/information?apiKey=${SPOONACULAR_API_KEY}`
         );

@@ -25,7 +25,7 @@ function IngredientInput({
     <div className="space-y-6">
       {/* Ingredient Search */}
       <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900">What's in your kitchen?</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900">What&apos;s in your kitchen?</h2>
         <div className="relative">
           <input
             type="text"
