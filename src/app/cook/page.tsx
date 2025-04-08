@@ -3,6 +3,9 @@
 import { useState, FormEvent, KeyboardEvent } from 'react';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
+import IngredientInput from '@/components/IngredientInput';
+import ImageUpload from '@/components/ImageUpload';
+import RecipeSuggestions from '@/components/RecipeSuggestions';
 
 interface Recipe {
   id: number;
@@ -89,149 +92,28 @@ export default function CookPage() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Left Column - Input Section */}
           <div className="space-y-6">
-            {/* Ingredient Search */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-900">What's in your kitchen?</h2>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type ingredient name..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-grapefruit focus:border-transparent"
-                />
-                <button 
-                  onClick={handleAddIngredient}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-grapefruit text-white px-4 py-2 rounded-lg hover:bg-grapefruit-dark transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-              
-              {/* Added Ingredients */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                {ingredients.map((ingredient, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-grapefruit-light text-grapefruit-dark px-3 py-1 rounded-full text-sm flex items-center"
-                  >
-                    {ingredient}
-                    <button 
-                      onClick={() => handleRemoveIngredient(ingredient)}
-                      className="ml-2 text-grapefruit hover:text-grapefruit-dark"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-
-              {/* Search Button */}
-              <div className="mt-6">
-                <button
-                  onClick={searchRecipes}
-                  disabled={ingredients.length === 0 || isLoading}
-                  className="w-full bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Searching...' : 'Search Recipes'}
-                </button>
-              </div>
-            </div>
+            <IngredientInput
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              ingredients={ingredients}
+              handleAddIngredient={handleAddIngredient}
+              handleKeyPress={handleKeyPress}
+              handleRemoveIngredient={handleRemoveIngredient}
+              searchRecipes={searchRecipes}
+              isLoading={isLoading}
+            />
 
             {/* Image Upload */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-900">Or upload a photo</h2>
-              <div className="border-2 border-dashed border-grapefruit/20 rounded-lg p-8 text-center hover:border-grapefruit/40 transition-colors">
-                <input type="file" className="hidden" id="image-upload" accept="image/*" />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <div className="w-12 h-12 bg-grapefruit-light rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-grapefruit" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-600">Click to upload or drag and drop</p>
-                  <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB</p>
-                </label>
-              </div>
-              {/* Image Upload Search Button */}
-              <div className="mt-6">
-                <button
-                  onClick={() => {/* Image processing logic will go here */}}
-                  className="w-full bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors"
-                >
-                  Search with Image
-                </button>
-              </div>
-            </div>
+            <ImageUpload />
           </div>
 
           {/* Right Column - Recipe Suggestions */}
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-900">Recipe Suggestions</h2>
-              
-              {/* Display searched ingredients */}
-              {searchedIngredients.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Searching recipes with:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {searchedIngredients.map((ingredient, index) => (
-                      <span 
-                        key={index}
-                        className="bg-grapefruit-light text-grapefruit-dark px-3 py-1 rounded-full text-sm"
-                      >
-                        {ingredient}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-6">
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="w-12 h-12 border-4 border-grapefruit border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Finding the perfect recipes...</p>
-                  </div>
-                ) : recipes.length > 0 ? (
-                  recipes.map((recipe) => (
-                    <div 
-                      key={recipe.id}
-                      className="flex gap-4 p-4 border border-grapefruit/10 rounded-lg hover:border-grapefruit/30 transition-all hover:shadow-md group"
-                    >
-                      <div className="w-24 h-24 bg-grapefruit-light rounded-lg overflow-hidden relative">
-                        <Image
-                          src={recipe.image}
-                          alt={recipe.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg group-hover:text-grapefruit transition-colors">
-                          {recipe.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-2">
-                          {recipe.missedIngredientCount > 0 
-                            ? `Missing ${recipe.missedIngredientCount} ingredient${recipe.missedIngredientCount > 1 ? 's' : ''}`
-                            : 'You have all ingredients!'}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">{recipe.readyInMinutes} mins</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 mt-8">
-                    {searchedIngredients.length > 0 
-                      ? 'No recipes found. Try different ingredients!'
-                      : 'Add ingredients or upload a photo to see recipe suggestions'}
-                  </div>
-                )}
-              </div>
-            </div>
+            <RecipeSuggestions
+              searchedIngredients={searchedIngredients}
+              isLoading={isLoading}
+              recipes={recipes}
+            />
 
             {/* AI Recipe Suggestions */}
             {searchedIngredients.length > 0 && (
