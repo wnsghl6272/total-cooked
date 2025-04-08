@@ -1,10 +1,35 @@
 import Image from "next/image";
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Head from 'next/head';
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col">
+      <Head>
+        <title>totallyCooked - Transform Ingredients into Delicious Meals</title>
+        <meta name="description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
+        <meta name="keywords" content="recipes, cooking, AI, ingredients, food, meal planning" />
+        <meta property="og:title" content="totallyCooked - Transform Ingredients into Delicious Meals" />
+        <meta property="og:description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
+        <meta property="og:image" content="/path/to/your/image.jpg" />
+        <meta property="og:url" content="https://yourwebsite.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="totallyCooked - Transform Ingredients into Delicious Meals" />
+        <meta name="twitter:description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
+        <meta name="twitter:image" content="/path/to/your/image.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "totallyCooked - Transform Ingredients into Delicious Meals",
+            "description": "Use AI to turn your ingredients into delicious meals with personalized recipe suggestions.",
+            "url": "https://yourwebsite.com",
+            "image": "/path/to/your/image.jpg"
+          })}
+        </script>
+        <link rel="canonical" href="https://yourwebsite.com" />
+      </Head>
       <Navbar />
       
       {/* Hero Section */}

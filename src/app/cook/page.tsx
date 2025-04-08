@@ -6,6 +6,7 @@ import Image from 'next/image';
 import IngredientInput from '@/components/IngredientInput';
 import ImageUpload from '@/components/ImageUpload';
 import RecipeSuggestions from '@/components/RecipeSuggestions';
+import Head from 'next/head';
 
 interface Recipe {
   id: number;
@@ -86,6 +87,30 @@ export default function CookPage() {
 
   return (
     <main className="min-h-screen bg-grapefruit-light/20">
+      <Head>
+        <title>Cook Page - Your Recipe Finder</title>
+        <meta name="description" content="Find the best recipes based on the ingredients you have at home." />
+        <meta name="keywords" content="recipes, cooking, ingredients, food, AI suggestions" />
+        <meta property="og:title" content="Cook Page - Your Recipe Finder" />
+        <meta property="og:description" content="Find the best recipes based on the ingredients you have at home." />
+        <meta property="og:image" content="/path/to/your/image.jpg" />
+        <meta property="og:url" content="https://yourwebsite.com/cook" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Cook Page - Your Recipe Finder" />
+        <meta name="twitter:description" content="Find the best recipes based on the ingredients you have at home." />
+        <meta name="twitter:image" content="/path/to/your/image.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Cook Page - Your Recipe Finder",
+            "description": "Find the best recipes based on the ingredients you have at home.",
+            "url": "https://yourwebsite.com/cook",
+            "image": "/path/to/your/image.jpg"
+          })}
+        </script>
+        <link rel="canonical" href="https://yourwebsite.com/cook" />
+      </Head>
       <Navbar />
       
       <div className="pt-24 px-4 max-w-7xl mx-auto">
