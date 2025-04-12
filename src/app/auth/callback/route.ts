@@ -1,6 +1,9 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { RequestCookies } from 'next/dist/server/web/spec-extension/cookies';
+
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -8,18 +11,35 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') ?? '/';
 
   if (code) {
-    const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const response = NextResponse.redirect(new URL(next, request.url));
+    const cookieStore = cookies() as unknown as RequestCookies;
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name, value, options) {
+            response.cookies.set({ name, value, ...options });
+          },
+          remove(name, options) {
+            response.cookies.delete(name);
+          },
+        },
+      }
+    );
     
     try {
       await supabase.auth.exchangeCodeForSession(code);
+      return response;
     } catch (error) {
       console.error('Error exchanging code for session:', error);
-      // Redirect to error page if exchange fails
       return NextResponse.redirect(new URL('/auth/error', request.url));
     }
   }
 
-  // URL to redirect to after sign in process completes
   return NextResponse.redirect(new URL(next, request.url));
 } 
