@@ -51,7 +51,7 @@ export default function VerifyEmail() {
           <div className="mt-4 text-gray-600">
             {!isVerified ? (
               <>
-                <p>We sent a verification link to</p>
+                <p>We sent a verification link to your registered email</p>
                 <p className="font-medium text-grapefruit">{email}</p>
               </>
             ) : (
@@ -66,15 +66,10 @@ export default function VerifyEmail() {
                 Click the link in the email to verify your account. If you don&apos;t see the email, check your spam folder.
               </p>
               <button
-                onClick={checkVerification}
-                disabled={isChecking}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-grapefruit hover:bg-grapefruit-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-grapefruit disabled:opacity-50"
+                onClick={() => router.push('/auth/login')}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-grapefruit hover:bg-grapefruit-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-grapefruit"
               >
-                {isChecking ? (
-                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin" />
-                ) : (
-                  'Check Verification Status'
-                )}
+                Go to Login
               </button>
             </>
           ) : (
