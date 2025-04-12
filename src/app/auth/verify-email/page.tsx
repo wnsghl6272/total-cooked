@@ -34,7 +34,7 @@ export default function VerifyEmail() {
         </div>
         <div className="mt-8 space-y-4">
           <p className="text-sm text-gray-500">
-            Click the link in the email to verify your account. If you don't see the email, check your spam folder.
+            Click the link in the email to verify your account. If you don&apos;t see the email, check your spam folder.
           </p>
           <div className="animate-pulse flex justify-center">
             <div className="w-8 h-8 border-t-2 border-b-2 border-grapefruit rounded-full animate-spin"></div>

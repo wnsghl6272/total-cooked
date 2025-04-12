@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -30,8 +31,9 @@ export default function SignUp() {
       const { error } = await signUp(email, password, fullName);
       if (error) throw error;
       router.push('/auth/verify-email');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during sign up');
+    } catch (err: Error | unknown) {
+      const error = err as Error;
+      setError(error.message || 'An error occurred during sign up');
     } finally {
       setLoading(false);
     }
@@ -44,8 +46,9 @@ export default function SignUp() {
     try {
       const { error } = await signInWithGoogle();
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during Google sign in');
+    } catch (err: Error | unknown) {
+      const error = err as Error;
+      setError(error.message || 'An error occurred during Google sign in');
       setLoading(false);
     }
   };
@@ -165,7 +168,9 @@ export default function SignUp() {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-grapefruit disabled:opacity-50"
               >
-                <img
+                <Image
+                  width={20}
+                  height={20}
                   className="h-5 w-5 mr-2"
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
                   alt="Google logo"
