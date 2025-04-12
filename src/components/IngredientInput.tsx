@@ -1,4 +1,6 @@
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface IngredientInputProps {
   inputValue: string;
@@ -21,6 +23,31 @@ function IngredientInput({
   searchRecipes,
   isLoading
 }: IngredientInputProps) {
+  const [searchCount, setSearchCount] = useState(0);
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const count = localStorage.getItem('recipeSearchCount');
+    if (count) {
+      setSearchCount(parseInt(count));
+    }
+  }, []);
+
+  const handleSearch = () => {
+    if (!user && searchCount >= 1) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    searchRecipes();
+    if (!user) {
+      const newCount = searchCount + 1;
+      setSearchCount(newCount);
+      localStorage.setItem('recipeSearchCount', newCount.toString());
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Ingredient Search */}
@@ -64,11 +91,11 @@ function IngredientInput({
         {/* Search Button */}
         <div className="mt-6">
           <button
-            onClick={searchRecipes}
+            onClick={handleSearch}
             disabled={ingredients.length === 0 || isLoading}
             className="w-full bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Searching...' : 'Search Recipes'}
+            {isLoading ? 'Searching...' : (!user && searchCount >= 1) ? 'Sign in to Search More Recipes' : 'Search Recipes'}
           </button>
         </div>
       </div>
