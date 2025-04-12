@@ -22,8 +22,9 @@ export default function SignIn() {
       const { error } = await signIn(email, password);
       if (error) throw error;
       router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during sign in');
+    } catch (err: Error | unknown) {
+      const error = err as Error;
+      setError(error.message || 'An error occurred during sign in');
     } finally {
       setLoading(false);
     }
@@ -36,8 +37,9 @@ export default function SignIn() {
     try {
       const { error } = await signInWithGoogle();
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during Google sign in');
+    } catch (err: Error | unknown) {
+      const error = err as Error;
+      setError(error.message || 'An error occurred during Google sign in');
       setLoading(false);
     }
   };
