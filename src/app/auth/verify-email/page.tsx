@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabaseClient';
 export default function VerifyEmail() {
   const [email, setEmail] = useState<string>('');
   const [isVerified, setIsVerified] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -22,20 +21,6 @@ export default function VerifyEmail() {
       setEmail(user.email);
     }
   }, [user]);
-
-  const checkVerification = async () => {
-    setIsChecking(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email_confirmed_at) {
-        setIsVerified(true);
-      }
-    } catch (error) {
-      console.error('Error checking verification status:', error);
-    } finally {
-      setIsChecking(false);
-    }
-  };
 
   const handleGoHome = () => {
     router.push('/');
