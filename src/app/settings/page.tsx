@@ -34,7 +34,7 @@ export default function SettingsPage() {
       const { error } = await updateProfile({ full_name: fullName });
       if (error) throw error;
       setMessage({ type: 'success', text: 'Settings updated successfully!' });
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update settings. Please try again.' });
     } finally {
       setIsSaving(false);
