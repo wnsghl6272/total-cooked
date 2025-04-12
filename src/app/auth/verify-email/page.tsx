@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabaseClient';
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState<string>('');
