@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
-import vision from '@google-cloud/vision';
+import vision, { protos } from '@google-cloud/vision';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
+import os from 'os';
 
 // Google Cloud Vision client initialization
-const client = new vision.ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-});
+let client: vision.ImageAnnotatorClient;
+
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
+  // Decode base64 credentials
+  const credentials = Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64, 'base64').toString();
+  const credentialsJson = JSON.parse(credentials);
+  
+  // Initialize client with credentials JSON
+  client = new vision.ImageAnnotatorClient({
+    credentials: credentialsJson
+  });
+} else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  // Fallback to file-based credentials for local development
+  client = new vision.ImageAnnotatorClient({
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  });
+} else {
+  throw new Error('No Google Cloud credentials provided');
+}
 
 // 제외할 일반적인 키워드
 const EXCLUDE_KEYWORDS = [
@@ -74,7 +93,7 @@ export async function POST(request: Request) {
     const detectedItems = new Map<string, number>();
 
     // Add labels with scores
-    labels.forEach(label => {
+    labels.forEach((label: protos.google.cloud.vision.v1.IEntityAnnotation) => {
       if (label.score && label.description) {
         const desc = label.description.toLowerCase();
         if (!EXCLUDE_KEYWORDS.includes(desc)) {
@@ -86,7 +105,7 @@ export async function POST(request: Request) {
     });
 
     // Add detected objects with scores
-    objects.forEach(obj => {
+    objects.forEach((obj: protos.google.cloud.vision.v1.ILocalizedObjectAnnotation) => {
       if (obj.score && obj.name) {
         const name = obj.name.toLowerCase();
         if (!EXCLUDE_KEYWORDS.includes(name)) {
