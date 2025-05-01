@@ -23,7 +23,16 @@ export async function GET(request: Request) {
             return cookieStore.get(name)?.value;
           },
           set(name, value, options) {
-            response.cookies.set({ name, value, ...options });
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax',
+              maxAge: 60 * 60 * 24 * 7, // 7 days
+              path: '/',
+            });
           },
           remove(name) {
             response.cookies.delete(name);
@@ -33,10 +42,23 @@ export async function GET(request: Request) {
     );
     
     try {
-      await supabase.auth.exchangeCodeForSession(code);
+      console.log('Exchanging code for session...');
+      const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (error) throw error;
+      
+      if (!session) {
+        console.error('No session returned after code exchange');
+        throw new Error('No session returned');
+      }
+
+      console.log('Session exchange successful');
       return response;
     } catch (error) {
       console.error('Error exchanging code for session:', error);
+      // Clear any partial session data
+      response.cookies.delete('sb-access-token');
+      response.cookies.delete('sb-refresh-token');
       return NextResponse.redirect(new URL('/auth/error', request.url));
     }
   }
