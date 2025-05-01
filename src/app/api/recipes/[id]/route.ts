@@ -3,9 +3,15 @@ import { NextResponse } from 'next/server';
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
+interface Context {
+  params: {
+    id: string;
+  };
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: Context
 ) {
   try {
     if (!SPOONACULAR_API_KEY) {
@@ -16,7 +22,7 @@ export async function GET(
     }
 
     const response = await fetch(
-      `${BASE_URL}/${params.id}/information?apiKey=${SPOONACULAR_API_KEY}`
+      `${BASE_URL}/${context.params.id}/information?apiKey=${SPOONACULAR_API_KEY}`
     );
 
     if (!response.ok) {
