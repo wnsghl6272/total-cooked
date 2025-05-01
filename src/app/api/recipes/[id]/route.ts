@@ -3,17 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
-
 export async function GET(
   request: NextRequest,
-  { params }: Props
+  context: { params: { id: string } }
 ) {
-  const { id } = await Promise.resolve(params);
+  const { id } = await Promise.resolve(context.params);
 
   if (!SPOONACULAR_API_KEY) {
     return NextResponse.json(
