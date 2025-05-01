@@ -1,24 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export async function GET(
-  _request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
-  const id = params.id;
-
-  if (!SPOONACULAR_API_KEY) {
-    return NextResponse.json(
-      { error: 'Spoonacular API key not configured' },
-      { status: 500 }
-    );
-  }
-
   try {
+    if (!SPOONACULAR_API_KEY) {
+      return NextResponse.json(
+        { error: 'Spoonacular API key not configured' },
+        { status: 500 }
+      );
+    }
+
     const response = await fetch(
-      `${BASE_URL}/${id}/information?apiKey=${SPOONACULAR_API_KEY}`
+      `${BASE_URL}/${params.id}/information?apiKey=${SPOONACULAR_API_KEY}`
     );
 
     if (!response.ok) {
