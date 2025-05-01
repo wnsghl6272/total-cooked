@@ -42,24 +42,50 @@ export async function GET(request: Request) {
     );
     
     try {
-      console.log('Exchanging code for session...');
+      console.log('Exchanging code for session...', { code });
+      
+      // Get the code verifier cookie
+      const codeVerifier = cookieStore.get('code_verifier')?.value;
+      console.log('Code verifier from cookie:', codeVerifier);
+      
+      if (!codeVerifier) {
+        throw new Error('No code verifier found in cookies');
+      }
+
       const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error in exchangeCodeForSession:', error);
+        throw error;
+      }
       
       if (!session) {
         console.error('No session returned after code exchange');
         throw new Error('No session returned');
       }
 
-      console.log('Session exchange successful');
+      console.log('Session exchange successful', { 
+        user: session.user.id,
+        expires_at: session.expires_at
+      });
+      
+      // Clean up the code verifier cookie
+      response.cookies.delete('code_verifier');
+      
       return response;
     } catch (error) {
       console.error('Error exchanging code for session:', error);
       // Clear any partial session data
       response.cookies.delete('sb-access-token');
       response.cookies.delete('sb-refresh-token');
-      return NextResponse.redirect(new URL('/auth/error', request.url));
+      response.cookies.delete('code_verifier');
+      
+      // Add error details to the redirect URL
+      const errorUrl = new URL('/auth/error', request.url);
+      if (error instanceof Error) {
+        errorUrl.searchParams.set('message', error.message);
+      }
+      return NextResponse.redirect(errorUrl);
     }
   }
 
