@@ -264,7 +264,7 @@ export default function RecipeDetailPage() {
                       </div>
                       <div className="ml-4">
                         <p className="text-gray-700">{step.step}</p>
-                        {(step.ingredients?.length > 0 || step.equipment?.length > 0) && (
+                        {(step.ingredients && step.ingredients.length > 0) || (step.equipment && step.equipment.length > 0) && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {step.ingredients?.map((ingredient) => (
                               <span
