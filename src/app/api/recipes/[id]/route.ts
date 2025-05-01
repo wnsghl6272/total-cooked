@@ -4,10 +4,10 @@ const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { id } = params;
+  const id = params.id;
 
   if (!SPOONACULAR_API_KEY) {
     return NextResponse.json(
