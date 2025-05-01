@@ -42,25 +42,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Current session:', session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        }
+        setLoading(false);
 
-    // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-    });
+        // Listen for changes on auth state
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('Auth state changed:', event, session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+          } else {
+            setProfile(null);
+            // Only redirect on explicit sign out, not on token refresh
+            if (event === 'SIGNED_OUT') {
+              window.location.href = '/auth/signin';
+            }
+          }
+        });
 
-    return () => subscription.unsubscribe();
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -69,13 +85,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    });
-    return { error };
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false
+        }
+      });
+
+      if (error) throw error;
+      
+      return { error: null };
+    } catch (error) {
+      console.error('Error during Google sign in:', error);
+      return { error: error as AuthError };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {

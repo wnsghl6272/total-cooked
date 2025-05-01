@@ -13,5 +13,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storageKey: 'total-cooked-auth',
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   },
 }); 

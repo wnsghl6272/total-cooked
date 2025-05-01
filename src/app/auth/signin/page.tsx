@@ -37,7 +37,11 @@ export default function SignIn() {
 
     try {
       const { error } = await signInWithGoogle();
-      if (error) throw error;
+      if (error) {
+        console.error('Google sign in error:', error);
+        throw error;
+      }
+      // OAuth redirect will happen automatically
     } catch (err: Error | unknown) {
       const error = err as Error;
       setError(error.message || 'An error occurred during Google sign in');
