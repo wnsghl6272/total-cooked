@@ -5,7 +5,7 @@ const BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: any }
 ) {
   const { id } = context.params;
 
