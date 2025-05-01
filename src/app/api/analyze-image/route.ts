@@ -6,13 +6,6 @@ const client = new vision.ImageAnnotatorClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 
-// 식재료 관련 키워드 목록
-const FOOD_KEYWORDS = [
-  'vegetable', 'vegetables', 'fruit', 'fruits', 'meat', 'fish', 'seafood',
-  'ingredient', 'ingredients', 'produce', 'herb', 'herbs', 'spice', 'spices',
-  'grain', 'grains', 'dairy', 'protein', 'food'
-];
-
 // 제외할 일반적인 키워드
 const EXCLUDE_KEYWORDS = [
   'food', 'ingredient', 'ingredients', 'natural foods', 'cuisine', 'dish', 'meal',
