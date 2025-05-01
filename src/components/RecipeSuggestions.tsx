@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Recipe {
   id: number;
@@ -19,6 +20,12 @@ function RecipeSuggestions({
   isLoading,
   recipes
 }: RecipeSuggestionsProps) {
+  const router = useRouter();
+
+  const handleRecipeClick = (recipeId: number) => {
+    router.push(`/recipe/${recipeId}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -51,11 +58,12 @@ function RecipeSuggestions({
             recipes.map((recipe) => (
               <div 
                 key={recipe.id}
-                className="flex items-center space-x-4"
+                className="flex items-center space-x-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                onClick={() => handleRecipeClick(recipe.id)}
               >
                 <Image src={recipe.image} alt={recipe.title} width={64} height={64} className="rounded-lg" />
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{recipe.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 hover:text-grapefruit transition-colors">{recipe.title}</h3>
                   <p className="text-sm text-gray-500">Ready in {recipe.readyInMinutes} minutes</p>
                 </div>
               </div>

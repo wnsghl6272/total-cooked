@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useState } from 'react';
+import { KeyboardEvent, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -11,6 +11,7 @@ interface IngredientInputProps {
   handleRemoveIngredient: (ingredient: string) => void;
   searchRecipes: () => void;
   isLoading: boolean;
+  clearIngredients: () => void;
 }
 
 function IngredientInput({
@@ -21,9 +22,14 @@ function IngredientInput({
   handleKeyPress,
   handleRemoveIngredient,
   searchRecipes,
-  isLoading
+  isLoading,
+  clearIngredients
 }: IngredientInputProps) {
   const [searchCount, setSearchCount] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -32,6 +38,38 @@ function IngredientInput({
     if (count) {
       setSearchCount(parseInt(count));
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (inputValue.trim().length < 3) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/ingredients?query=${encodeURIComponent(inputValue)}`);
+        const data = await response.json();
+        setSuggestions(data.suggestions);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 800);
+    return () => clearTimeout(debounceTimer);
+  }, [inputValue]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSearch = () => {
@@ -48,6 +86,31 @@ function IngredientInput({
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputValue(suggestion);
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[selectedIndex]);
+      handleAddIngredient();
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Ingredient Search */}
@@ -59,6 +122,8 @@ function IngredientInput({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowSuggestions(true)}
             placeholder="Type ingredient name..."
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-grapefruit focus:border-transparent"
           />
@@ -68,6 +133,26 @@ function IngredientInput({
           >
             Add
           </button>
+
+          {/* Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              ref={suggestionsRef}
+              className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
+            >
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={suggestion}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className={`px-4 py-2 cursor-pointer hover:bg-grapefruit-light ${
+                    index === selectedIndex ? 'bg-grapefruit-light' : ''
+                  }`}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Added Ingredients */}
@@ -86,18 +171,27 @@ function IngredientInput({
               </button>
             </span>
           ))}
+          {ingredients.length > 0 && (
+            <button
+              onClick={clearIngredients}
+              className="text-sm text-gray-500 hover:text-grapefruit transition-colors ml-2 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Clear all
+            </button>
+          )}
         </div>
 
         {/* Search Button */}
-        <div className="mt-6">
-          <button
-            onClick={handleSearch}
-            disabled={ingredients.length === 0 || isLoading}
-            className="w-full bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Searching...' : (!user && searchCount >= 1) ? 'Sign in to Search More Recipes' : 'Search Recipes'}
-          </button>
-        </div>
+        <button
+          onClick={handleSearch}
+          disabled={ingredients.length === 0 || isLoading}
+          className="w-full mt-4 bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Searching...' : (!user && searchCount >= 1) ? 'Sign in to Search More Recipes' : 'Search Recipes'}
+        </button>
       </div>
     </div>
   );

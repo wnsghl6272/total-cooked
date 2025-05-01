@@ -36,8 +36,26 @@ export default function CookPage() {
   const handleAddIngredient = () => {
     const trimmedInput = inputValue.trim().toLowerCase();
     if (trimmedInput && !ingredients.includes(trimmedInput)) {
-      setIngredients([...ingredients, trimmedInput]);
-      setInputValue('');
+      fetch(`/api/ingredients?query=${encodeURIComponent(trimmedInput)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.suggestions && data.suggestions.length > 0) {
+            // API에서 반환된 정규화된 재료 이름 사용
+            const normalizedIngredient = data.suggestions[0];
+            if (!ingredients.includes(normalizedIngredient)) {
+              setIngredients([...ingredients, normalizedIngredient]);
+            }
+          }
+          setInputValue('');
+        })
+        .catch(error => {
+          console.error('Error validating ingredient:', error);
+          // API 오류 시 사용자 입력 그대로 사용
+          if (!ingredients.includes(trimmedInput)) {
+            setIngredients([...ingredients, trimmedInput]);
+          }
+          setInputValue('');
+        });
     }
   };
 
@@ -49,6 +67,36 @@ export default function CookPage() {
 
   const handleRemoveIngredient = (ingredient: string) => {
     setIngredients(ingredients.filter(item => item !== ingredient));
+  };
+
+  const clearIngredients = () => {
+    setIngredients([]);
+    setInputValue('');
+  };
+
+  const handleIngredientsFromImage = async (detectedIngredients: string[]) => {
+    // Normalize detected ingredients using the ingredients API
+    const normalizedIngredients = await Promise.all(
+      detectedIngredients.map(async (ingredient) => {
+        try {
+          const response = await fetch(`/api/ingredients?query=${encodeURIComponent(ingredient)}`);
+          const data = await response.json();
+          return data.suggestions && data.suggestions.length > 0 ? data.suggestions[0] : ingredient;
+        } catch (error) {
+          console.error('Error normalizing ingredient:', error);
+          return ingredient;
+        }
+      })
+    );
+
+    // Add normalized ingredients that aren't already in the list
+    const newIngredients = normalizedIngredients.filter(
+      ingredient => !ingredients.includes(ingredient)
+    );
+    
+    if (newIngredients.length > 0) {
+      setIngredients([...ingredients, ...newIngredients]);
+    }
   };
 
   const getAiSuggestions = async (ingredients: string[]) => {
@@ -125,10 +173,11 @@ export default function CookPage() {
               handleRemoveIngredient={handleRemoveIngredient}
               searchRecipes={searchRecipes}
               isLoading={isLoading}
+              clearIngredients={clearIngredients}
             />
 
             {/* Image Upload */}
-            <ImageUpload />
+            <ImageUpload onIngredientsDetected={handleIngredientsFromImage} />
           </div>
 
           {/* Right Column - Recipe Suggestions */}
