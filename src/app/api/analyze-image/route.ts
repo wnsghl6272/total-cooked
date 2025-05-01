@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import vision, { protos } from '@google-cloud/vision';
-import { writeFileSync } from 'fs';
-import { join } from 'path';
-import os from 'os';
+import * as vision from '@google-cloud/vision';
+import { protos } from '@google-cloud/vision';
 
 // Google Cloud Vision client initialization
-let client: vision.ImageAnnotatorClient;
+let client: vision.v1.ImageAnnotatorClient;
 
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
   // Decode base64 credentials
@@ -13,12 +11,12 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
   const credentialsJson = JSON.parse(credentials);
   
   // Initialize client with credentials JSON
-  client = new vision.ImageAnnotatorClient({
+  client = new vision.v1.ImageAnnotatorClient({
     credentials: credentialsJson
   });
 } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   // Fallback to file-based credentials for local development
-  client = new vision.ImageAnnotatorClient({
+  client = new vision.v1.ImageAnnotatorClient({
     keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   });
 } else {
