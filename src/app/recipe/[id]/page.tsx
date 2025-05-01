@@ -56,6 +56,7 @@ export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'reviews'>('ingredients');
+  // TODO: setReviews will be used for adding new reviews in the future
   const [reviews, setReviews] = useState<Review[]>([
     {
       id: 1,
