@@ -91,8 +91,6 @@ export async function GET(request: Request) {
     // Get additional recipe information with retry logic
     const recipeDetails = await Promise.all(
       recipes.map(async (recipe: Recipe) => {
-        let lastError: Error | null = null;
-        
         for (let i = 0; i < MAX_RETRIES; i++) {
           try {
             const detailResponse = await fetchWithTimeout(
@@ -115,7 +113,6 @@ export async function GET(request: Request) {
               instructions: detail.instructions || 'No instructions available'
             };
           } catch (error) {
-            lastError = error as Error;
             // Only retry on network errors or 5xx errors
             if (error instanceof Error && error.name === 'AbortError') {
               continue;
