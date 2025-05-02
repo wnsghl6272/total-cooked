@@ -5,7 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "TotallyCooked - Transform Ingredients into Delicious Meals",
-  description: "Use AI to turn your ingredients into delicious meals with personalized recipe suggestions.",
+  description: "Use AI to turn your ingredients into delicious meals with personalized recipe suggestions."
 };
 
 export default function RootLayout({
