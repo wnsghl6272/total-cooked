@@ -33,67 +33,43 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-20 pb-16 md:pt-28 md:pb-24 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Turn Your Ingredients into
-            <span className="text-grapefruit"> Delicious Meals</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Simply input your ingredients or upload a photo, and our AI will identify them instantly. Get personalized recipe suggestions with detailed instructions and video guides.
-          </p>
+      <section className="relative h-screen">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/mainfoodimage.jpg"
+            alt="Delicious Food Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/50" />
         </div>
 
-        {/* Image Carousel */}
-        <div className="max-w-5xl mx-auto my-16 relative overflow-hidden rounded-2xl">
-          <div className="flex animate-scroll">
-            <div className="flex-none w-64 h-64 md:w-80 md:h-80 relative mx-2">
-              <Image
-                src="/food1.jpg"
-                alt="Delicious pasta dish"
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
-            <div className="flex-none w-64 h-64 md:w-80 md:h-80 relative mx-2">
-              <Image
-                src="/food2.png"
-                alt="Fresh salad"
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
-            <div className="flex-none w-64 h-64 md:w-80 md:h-80 relative mx-2">
-              <Image
-                src="/food3.jpg"
-                alt="Grilled steak"
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
-            {/* Duplicate images for infinite scroll */}
-            <div className="flex-none w-64 h-64 md:w-80 md:h-80 relative mx-2">
-              <Image
-                src="/food1.jpg"
-                alt="Delicious pasta dish"
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
+        {/* Content */}
+        <div className="relative h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-7xl font-bold text-white mb-6">
+              Turn Your Ingredients into
+              <span className="text-grapefruit"> Delicious Meals</span>
+            </h1>
+            <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+              Simply input your ingredients or upload a photo, and our AI will identify them instantly. Get personalized recipe suggestions with detailed instructions and video guides.
+            </p>
+            <Link 
+              href="/cook" 
+              className="bg-grapefruit text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-grapefruit-dark transition-colors inline-block"
+            >
+              Start Cooking
+            </Link>
           </div>
         </div>
+      </section>
 
-        <div className="text-center mt-8">
-          <Link 
-            href="/cook" 
-            className="bg-grapefruit text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-grapefruit-dark transition-colors inline-block"
-          >
-            Start Cooking
-          </Link>
-        </div>
-
-        {/* Features Grid */}
-        <div className="mt-24 grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      {/* Features Grid */}
+      <section className="py-20">
+        <div className="mt-12 grid md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <div className="w-12 h-12 bg-grapefruit-light rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-grapefruit" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,6 +102,90 @@ export default function Home() {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">How It Works</h2>
+          <div className="grid md:grid-cols-3 gap-12">
+            {/* Step 1 */}
+            <div className="text-center">
+              <div className="relative w-48 h-48 mx-auto mb-6">
+                <Image
+                  src="/step1.gif"
+                  alt="Create Account"
+                  fill
+                  className="object-contain rounded-lg"
+                  sizes="(max-width: 768px) 100vw, 192px"
+                  quality={75}
+                />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">Create Account</h3>
+              <ul className="text-gray-600 space-y-2">
+                <li>• Quick and easy sign-up process</li>
+                <li>• Personalize your cooking preferences</li>
+                <li>• Save your favorite recipes</li>
+                <li>• Track your cooking journey</li>
+              </ul>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center">
+              <div className="relative w-48 h-48 mx-auto mb-6">
+                <Image
+                  src="/step2.gif"
+                  alt="Enter Ingredients"
+                  fill
+                  className="object-contain rounded-lg"
+                  sizes="(max-width: 768px) 100vw, 192px"
+                  quality={75}
+                />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">Enter or Upload Your Ingredients</h3>
+              <ul className="text-gray-600 space-y-2">
+                <li>• Simply type or snap a photo</li>
+                <li>• AI instantly recognizes ingredients</li>
+                <li>• Smart suggestions for alternatives</li>
+                <li>• Create your ingredient inventory</li>
+              </ul>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center">
+              <div className="relative w-48 h-48 mx-auto mb-6">
+                <Image
+                  src="/step3.gif"
+                  alt="Start Cooking"
+                  fill
+                  className="object-contain rounded-lg"
+                  sizes="(max-width: 768px) 100vw, 192px"
+                  quality={75}
+                />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">Start Cooking</h3>
+              <ul className="text-gray-600 space-y-2">
+                <li>• Get personalized recipe matches</li>
+                <li>• Follow step-by-step video guides</li>
+                <li>• Save your favorite recipes</li>
+                <li>• Rate and review recipes</li>
+              </ul>
+            </div>
+          </div>
+          
+          {/* Find Recipe Button */}
+          <div className="text-center mt-16">
+            <Link
+              href="/cook"
+              className="bg-grapefruit text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-grapefruit-dark transition-colors inline-flex items-center gap-2"
+            >
+              Find Recipe
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gray-50 mt-auto">
         <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -136,9 +196,9 @@ export default function Home() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link href="/recipes" className="text-gray-600 hover:text-grapefruit">Recipes</Link></li>
-              <li><Link href="/ingredients" className="text-gray-600 hover:text-grapefruit">Ingredients</Link></li>
-              <li><Link href="/community" className="text-gray-600 hover:text-grapefruit">Community</Link></li>
+              <li><Link href="/plans" className="text-gray-600 hover:text-grapefruit">Plans</Link></li>
+              <li><Link href="/recipes-blog" className="text-gray-600 hover:text-grapefruit">Recipes Blog</Link></li>
+              <li><Link href="/contact" className="text-gray-600 hover:text-grapefruit">Contact Us</Link></li>
             </ul>
           </div>
           <div>
