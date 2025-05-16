@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import * as vision from '@google-cloud/vision';
-import { protos } from '@google-cloud/vision';
 
 // Constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
