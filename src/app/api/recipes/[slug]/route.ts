@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+import { extractRecipeId } from '@/utils/urlUtils';
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { slug: string } }
 ) {
   try {
     if (!SPOONACULAR_API_KEY) {
@@ -15,8 +16,9 @@ export async function GET(
       );
     }
 
+    const recipeId = extractRecipeId(params.slug);
     const response = await fetch(
-      `${BASE_URL}/${params.id}/information?apiKey=${SPOONACULAR_API_KEY}`
+      `${BASE_URL}/${recipeId}/information?apiKey=${SPOONACULAR_API_KEY}`
     );
 
     if (!response.ok) {
@@ -32,4 +34,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+} 
