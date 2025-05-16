@@ -1,134 +1,104 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import IngredientInput from '@/components/IngredientInput';
 import ImageUpload from '@/components/ImageUpload';
 import RecipeSuggestions from '@/components/RecipeSuggestions';
+import { useRecipeSearch } from '@/hooks/useRecipeSearch';
+import { saveScrollPosition, restoreScrollPosition } from '@/utils/scrollPosition';
+import { useAuth } from '@/contexts/AuthContext';
 import Head from 'next/head';
 
-interface Recipe {
-  id: number;
-  title: string;
-  image: string;
-  readyInMinutes: number;
-  missedIngredientCount: number;
-}
-
-interface AiRecipe {
-  name: string;
-  description: string;
-}
-
-interface AiSuggestions {
-  recipes: AiRecipe[];
-}
-
 export default function CookPage() {
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [searchedIngredients, setSearchedIngredients] = useState<string[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  
+  // Get initial ingredients from URL
+  const initialIngredients = searchParams.get('ingredients')?.split(',').filter(Boolean) || [];
+  
   const [inputValue, setInputValue] = useState('');
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [aiSuggestions, setAiSuggestions] = useState<AiRecipe[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [searchedIngredients, setSearchedIngredients] = useState<string[]>(initialIngredients);
+  const [searchCount, setSearchCount] = useState(0);
 
-  const handleAddIngredient = () => {
-    const trimmedInput = inputValue.trim().toLowerCase();
-    if (trimmedInput && !ingredients.includes(trimmedInput)) {
-      fetch(`/api/ingredients?query=${encodeURIComponent(trimmedInput)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.suggestions && data.suggestions.length > 0) {
-            // API에서 반환된 정규화된 재료 이름 사용
-            const normalizedIngredient = data.suggestions[0];
-            if (!ingredients.includes(normalizedIngredient)) {
-              setIngredients([...ingredients, normalizedIngredient]);
-            }
-          }
-          setInputValue('');
-        })
-        .catch(error => {
-          console.error('Error validating ingredient:', error);
-          // API 오류 시 사용자 입력 그대로 사용
-          if (!ingredients.includes(trimmedInput)) {
-            setIngredients([...ingredients, trimmedInput]);
-          }
-          setInputValue('');
-        });
+  // Use React Query for data fetching
+  const { data, isLoading } = useRecipeSearch(searchedIngredients);
+  const recipes = data?.recipes || [];
+  const aiSuggestions = data?.aiSuggestions || [];
+
+  // Load search count from localStorage
+  useEffect(() => {
+    const count = localStorage.getItem('recipeSearchCount');
+    if (count) {
+      setSearchCount(parseInt(count));
+    }
+  }, []);
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    if (initialIngredients.length > 0) {
+      restoreScrollPosition();
+    }
+  }, [initialIngredients.length]);
+
+  const updateSearchParams = (ingredients: string[]) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (ingredients.length > 0) {
+      params.set('ingredients', ingredients.join(','));
+    } else {
+      params.delete('ingredients');
+    }
+    // Save scroll position before navigation
+    saveScrollPosition();
+    router.push(`/cook?${params.toString()}`);
+  };
+
+  const handleAddIngredient = (ingredient: string) => {
+    if (ingredient.trim() && !ingredients.includes(ingredient.trim())) {
+      setIngredients([...ingredients, ingredient.trim()]);
+      setInputValue('');
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleAddIngredient();
+    if (e.key === 'Enter' && inputValue.trim()) {
+      handleAddIngredient(inputValue);
     }
   };
 
-  const handleRemoveIngredient = (ingredient: string) => {
-    setIngredients(ingredients.filter(item => item !== ingredient));
+  const handleRemoveIngredient = (index: number) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
   const clearIngredients = () => {
     setIngredients([]);
-    setInputValue('');
+    setSearchedIngredients([]);
+    updateSearchParams([]);
   };
 
   const handleIngredientsFromImage = async (detectedIngredients: string[]) => {
-    // Normalize detected ingredients using the ingredients API
-    const normalizedIngredients = await Promise.all(
-      detectedIngredients.map(async (ingredient) => {
-        try {
-          const response = await fetch(`/api/ingredients?query=${encodeURIComponent(ingredient)}`);
-          const data = await response.json();
-          return data.suggestions && data.suggestions.length > 0 ? data.suggestions[0] : ingredient;
-        } catch (error) {
-          console.error('Error normalizing ingredient:', error);
-          return ingredient;
-        }
-      })
-    );
-
-    // Add normalized ingredients that aren't already in the list
-    const newIngredients = normalizedIngredients.filter(
-      ingredient => !ingredients.includes(ingredient)
-    );
-    
-    if (newIngredients.length > 0) {
-      setIngredients([...ingredients, ...newIngredients]);
-    }
+    setIngredients([...new Set([...ingredients, ...detectedIngredients])]);
   };
 
-  const getAiSuggestions = async (ingredients: string[]) => {
-    setIsLoadingAi(true);
-    try {
-      const response = await fetch(`/api/ai-suggestions?ingredients=${ingredients.join(',')}`);
-      const data: AiSuggestions = await response.json();
-      setAiSuggestions(data.recipes);
-    } catch (error) {
-      console.error('Error getting AI suggestions:', error);
-    } finally {
-      setIsLoadingAi(false);
+  const searchRecipes = async (searchIngredients: string[] = ingredients) => {
+    if (searchIngredients.length === 0) return;
+
+    if (!user && searchCount >= 1) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
     }
-  };
 
-  const searchRecipes = async () => {
-    if (ingredients.length === 0) return;
+    setSearchedIngredients([...searchIngredients]);
+    updateSearchParams(searchIngredients);
+    setIngredients([]);
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/recipes?ingredients=${ingredients.join(',')}`);
-      const data = await response.json();
-      setRecipes(data);
-      setSearchedIngredients([...ingredients]); // Store searched ingredients
-      setIngredients([]); // Reset ingredients input
-      
-      // Get AI suggestions after recipe search
-      await getAiSuggestions(ingredients);
-    } catch (error) {
-      console.error('Error fetching recipes:', error);
-    } finally {
-      setIsLoading(false);
+    if (!user) {
+      const newCount = searchCount + 1;
+      setSearchCount(newCount);
+      localStorage.setItem('recipeSearchCount', newCount.toString());
     }
   };
 
@@ -171,7 +141,7 @@ export default function CookPage() {
               handleAddIngredient={handleAddIngredient}
               handleKeyPress={handleKeyPress}
               handleRemoveIngredient={handleRemoveIngredient}
-              searchRecipes={searchRecipes}
+              searchRecipes={() => searchRecipes()}
               isLoading={isLoading}
               clearIngredients={clearIngredients}
             />
@@ -193,13 +163,13 @@ export default function CookPage() {
               <div className="bg-white p-6 rounded-xl shadow-sm">
                 <h2 className="text-2xl font-semibold mb-6 text-gray-900">AI Chef Suggestions</h2>
                 <div className="space-y-6">
-                  {isLoadingAi ? (
+                  {isLoading ? (
                     <div className="text-center py-8">
                       <div className="w-12 h-12 border-4 border-grapefruit border-t-transparent rounded-full animate-spin mx-auto"></div>
                       <p className="mt-4 text-gray-600">Our AI chef is thinking...</p>
                     </div>
                   ) : aiSuggestions.length > 0 ? (
-                    aiSuggestions.map((recipe, index) => (
+                    aiSuggestions.map((recipe: { name: string; description: string }, index: number) => (
                       <div 
                         key={index}
                         className="p-4 border border-grapefruit/10 rounded-lg hover:border-grapefruit/30 transition-all hover:shadow-md"

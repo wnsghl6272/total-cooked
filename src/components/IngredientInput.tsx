@@ -1,3 +1,5 @@
+'use client';
+
 import { KeyboardEvent, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,15 +8,15 @@ interface IngredientInputProps {
   inputValue: string;
   setInputValue: (value: string) => void;
   ingredients: string[];
-  handleAddIngredient: () => void;
-  handleKeyPress: (e: KeyboardEvent<HTMLInputElement>) => void;
-  handleRemoveIngredient: (ingredient: string) => void;
+  handleAddIngredient: (ingredient: string) => void;
+  handleKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleRemoveIngredient: (index: number) => void;
   searchRecipes: () => void;
   isLoading: boolean;
   clearIngredients: () => void;
 }
 
-function IngredientInput({
+export default function IngredientInput({
   inputValue,
   setInputValue,
   ingredients,
@@ -72,20 +74,6 @@ function IngredientInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = () => {
-    if (!user && searchCount >= 1) {
-      router.push('/auth/signin');
-      return;
-    }
-
-    searchRecipes();
-    if (!user) {
-      const newCount = searchCount + 1;
-      setSearchCount(newCount);
-      localStorage.setItem('recipeSearchCount', newCount.toString());
-    }
-  };
-
   const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion);
     setShowSuggestions(false);
@@ -104,19 +92,34 @@ function IngredientInput({
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
       handleSuggestionClick(suggestions[selectedIndex]);
-      handleAddIngredient();
+      handleAddIngredient(inputValue);
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setSelectedIndex(-1);
     }
   };
 
+  const handleSearchClick = () => {
+    if (!user && searchCount >= 1) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
+    }
+
+    searchRecipes();
+    if (!user) {
+      const newCount = searchCount + 1;
+      setSearchCount(newCount);
+      localStorage.setItem('recipeSearchCount', newCount.toString());
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Ingredient Search */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900">What&apos;s in your kitchen?</h2>
-        <div className="relative">
+    <div className="bg-white p-6 rounded-xl shadow-sm">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-900">Add Your Ingredients</h2>
+      
+      {/* Input Section */}
+      <div className="space-y-4">
+        <div className="flex gap-2">
           <input
             type="text"
             value={inputValue}
@@ -124,77 +127,66 @@ function IngredientInput({
             onKeyPress={handleKeyPress}
             onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(true)}
-            placeholder="Type ingredient name..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-grapefruit focus:border-transparent"
+            placeholder="Type an ingredient..."
+            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-grapefruit focus:border-transparent"
           />
-          <button 
-            onClick={handleAddIngredient}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-grapefruit text-white px-4 py-2 rounded-lg hover:bg-grapefruit-dark transition-colors"
+          <button
+            onClick={() => handleAddIngredient(inputValue)}
+            disabled={!inputValue.trim()}
+            className="px-4 py-2 bg-grapefruit text-white rounded-lg hover:bg-grapefruit-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Add
           </button>
+        </div>
 
-          {/* Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div
-              ref={suggestionsRef}
-              className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
-            >
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={suggestion}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className={`px-4 py-2 cursor-pointer hover:bg-grapefruit-light ${
-                    index === selectedIndex ? 'bg-grapefruit-light' : ''
-                  }`}
+        {/* Ingredients List */}
+        {ingredients.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {ingredients.map((ingredient, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-grapefruit/10 text-grapefruit"
                 >
-                  {suggestion}
-                </div>
+                  {ingredient}
+                  <button
+                    onClick={() => handleRemoveIngredient(index)}
+                    className="ml-2 hover:text-grapefruit-dark"
+                  >
+                    ×
+                  </button>
+                </span>
               ))}
             </div>
-          )}
-        </div>
-        
-        {/* Added Ingredients */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {ingredients.map((ingredient, index) => (
-            <span 
-              key={index} 
-              className="bg-grapefruit-light text-grapefruit-dark px-3 py-1 rounded-full text-sm flex items-center"
-            >
-              {ingredient}
-              <button 
-                onClick={() => handleRemoveIngredient(ingredient)}
-                className="ml-2 text-grapefruit hover:text-grapefruit-dark"
+            
+            <div className="flex gap-2">
+              <button
+                onClick={handleSearchClick}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-grapefruit text-white rounded-lg hover:bg-grapefruit-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                ×
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Searching...
+                  </span>
+                ) : (
+                  'Find Recipes'
+                )}
               </button>
-            </span>
-          ))}
-          {ingredients.length > 0 && (
-            <button
-              onClick={clearIngredients}
-              className="text-sm text-gray-500 hover:text-grapefruit transition-colors ml-2 flex items-center"
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Clear all
-            </button>
-          )}
-        </div>
-
-        {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={ingredients.length === 0 || isLoading}
-          className="w-full mt-4 bg-grapefruit text-white py-3 rounded-lg hover:bg-grapefruit-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Searching...' : (!user && searchCount >= 1) ? 'Sign in to Search More Recipes' : 'Search Recipes'}
-        </button>
+              <button
+                onClick={clearIngredients}
+                className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
-
-export default IngredientInput; 
+} 

@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { GeistSans } from 'geist/font/sans';
+import { Inter } from 'next/font/google';
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import Providers from './providers';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "TotallyCooked - Transform Ingredients into Delicious Meals",
-  description: "Use AI to turn your ingredients into delicious meals with personalized recipe suggestions."
+  title: "Total Cooked",
+  description: "Find recipes with your ingredients"
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${GeistSans.className} antialiased`}
-      >
-        <AuthProvider>{children}</AuthProvider>
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

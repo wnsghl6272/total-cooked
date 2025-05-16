@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { generateRecipeSlug } from '@/utils/urlUtils';
 
 interface Recipe {
   id: number;
@@ -22,8 +23,9 @@ function RecipeSuggestions({
 }: RecipeSuggestionsProps) {
   const router = useRouter();
 
-  const handleRecipeClick = (recipeId: number) => {
-    router.push(`/recipe/${recipeId}`);
+  const handleRecipeClick = (recipe: Recipe) => {
+    const slug = generateRecipeSlug(recipe.title, recipe.id);
+    router.push(`/recipe/${slug}`);
   };
 
   return (
@@ -59,7 +61,7 @@ function RecipeSuggestions({
               <div 
                 key={recipe.id}
                 className="flex items-center space-x-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                onClick={() => handleRecipeClick(recipe.id)}
+                onClick={() => handleRecipeClick(recipe)}
               >
                 <Image src={recipe.image} alt={recipe.title} width={64} height={64} className="rounded-lg" />
                 <div>

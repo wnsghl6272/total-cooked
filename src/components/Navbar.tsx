@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
@@ -43,6 +44,16 @@ const Navbar = () => {
           <div className="flex items-center space-x-8">
             {/* Navigation Menu */}
             <div className="hidden md:flex items-center space-x-8">
+              <Link 
+                href="/cook" 
+                className={`text-gray-600 hover:text-grapefruit relative group ${pathname === '/cook' ? 'text-grapefruit' : ''}`}
+              >
+                Find Recipe
+                {pathname === '/cook' && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-grapefruit"></span>
+                )}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-grapefruit transition-all duration-300 group-hover:w-full"></span>
+              </Link>
               <Link href="/plans" className="text-gray-600 hover:text-grapefruit">
                 Plans
               </Link>
@@ -126,6 +137,16 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link
+                href="/cook"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  pathname === '/cook'
+                    ? 'text-grapefruit bg-grapefruit/5'
+                    : 'text-gray-700 hover:text-grapefruit hover:bg-gray-50'
+                }`}
+              >
+                Find Recipe
+              </Link>
               <Link
                 href="/plans"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-grapefruit hover:bg-gray-50"

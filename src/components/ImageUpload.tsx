@@ -14,13 +14,13 @@ function ImageUpload({ onIngredientsDetected }: ImageUploadProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) {
-      router.push('/auth/signin');
-      return;
-    }
-
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (!user) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
+    }
 
     console.log('File selected:', file.name, file.type, file.size);
 
@@ -76,7 +76,11 @@ function ImageUpload({ onIngredientsDetected }: ImageUploadProps) {
 
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (!user) return;
+    
+    if (!user) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
+    }
 
     const file = event.dataTransfer.files[0];
     if (!file) return;
@@ -94,14 +98,22 @@ function ImageUpload({ onIngredientsDetected }: ImageUploadProps) {
     event.preventDefault();
   };
 
+  const handleClick = () => {
+    if (!user) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <h2 className="text-2xl font-semibold mb-4 text-gray-900">Or upload a photo</h2>
       <div 
-        className={`border-2 border-dashed ${user ? 'border-grapefruit/20 hover:border-grapefruit/40' : 'border-gray-200'} rounded-lg p-8 text-center transition-colors ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+        className="border-2 border-dashed border-grapefruit/20 hover:border-grapefruit/40 rounded-lg p-8 text-center transition-colors cursor-pointer"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        onClick={() => user && fileInputRef.current?.click()}
+        onClick={handleClick}
       >
         <input 
           type="file" 
@@ -109,22 +121,22 @@ function ImageUpload({ onIngredientsDetected }: ImageUploadProps) {
           ref={fileInputRef}
           onChange={handleImageUpload}
           accept="image/*" 
-          disabled={!user || isAnalyzing} 
+          disabled={isAnalyzing}
         />
-        <label className={user ? 'cursor-pointer' : 'cursor-not-allowed'}>
-          <div className={`w-12 h-12 ${user ? 'bg-grapefruit-light' : 'bg-gray-100'} rounded-full mx-auto mb-4 flex items-center justify-center`}>
+        <label className="cursor-pointer">
+          <div className="w-12 h-12 bg-grapefruit-light rounded-full mx-auto mb-4 flex items-center justify-center">
             {isAnalyzing ? (
               <div className="w-6 h-6 border-2 border-grapefruit border-t-transparent rounded-full animate-spin" />
             ) : (
-              <svg className={`w-6 h-6 ${user ? 'text-grapefruit' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-grapefruit" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             )}
           </div>
-          <p className={`${user ? 'text-gray-600' : 'text-gray-400'}`}>
-            {isAnalyzing ? 'Analyzing image...' : (user ? 'Click to upload or drag and drop' : 'Sign in to upload images')}
+          <p className="text-gray-600">
+            {isAnalyzing ? 'Analyzing image...' : 'Click to upload or drag and drop'}
           </p>
-          <p className={`text-sm ${user ? 'text-gray-500' : 'text-gray-400'} mt-1`}>PNG, JPG up to 10MB</p>
+          <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB</p>
         </label>
       </div>
       
