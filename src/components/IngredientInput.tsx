@@ -1,3 +1,5 @@
+'use client';
+
 import { KeyboardEvent, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,20 +74,6 @@ export default function IngredientInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = () => {
-    if (!user && searchCount >= 1) {
-      router.push('/auth/signin');
-      return;
-    }
-
-    searchRecipes();
-    if (!user) {
-      const newCount = searchCount + 1;
-      setSearchCount(newCount);
-      localStorage.setItem('recipeSearchCount', newCount.toString());
-    }
-  };
-
   const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion);
     setShowSuggestions(false);
@@ -108,6 +96,20 @@ export default function IngredientInput({
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setSelectedIndex(-1);
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (!user && searchCount >= 1) {
+      router.push('/auth/signin?redirect=/cook');
+      return;
+    }
+
+    searchRecipes();
+    if (!user) {
+      const newCount = searchCount + 1;
+      setSearchCount(newCount);
+      localStorage.setItem('recipeSearchCount', newCount.toString());
     }
   };
 
@@ -159,7 +161,7 @@ export default function IngredientInput({
             
             <div className="flex gap-2">
               <button
-                onClick={searchRecipes}
+                onClick={handleSearchClick}
                 disabled={isLoading}
                 className="flex-1 px-4 py-2 bg-grapefruit text-white rounded-lg hover:bg-grapefruit-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >

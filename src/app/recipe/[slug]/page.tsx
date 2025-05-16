@@ -58,7 +58,7 @@ export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'reviews'>('ingredients');
-  const [reviews, setReviews] = useState<Review[]>([
+  const [reviews] = useState<Review[]>([
     {
       id: 1,
       user: "Sarah Johnson",

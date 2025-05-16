@@ -13,7 +13,7 @@ interface AiRecipe {
   description: string;
 }
 
-async function fetchRecipes(ingredients: string[]) {
+async function fetchRecipes(ingredients: string[]): Promise<{ recipes: Recipe[], aiSuggestions: AiRecipe[] }> {
   if (!ingredients.length) return { recipes: [], aiSuggestions: [] };
   
   const [recipesResponse, aiResponse] = await Promise.all([

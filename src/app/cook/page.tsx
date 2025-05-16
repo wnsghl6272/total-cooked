@@ -11,23 +11,6 @@ import { saveScrollPosition, restoreScrollPosition } from '@/utils/scrollPositio
 import { useAuth } from '@/contexts/AuthContext';
 import Head from 'next/head';
 
-interface Recipe {
-  id: number;
-  title: string;
-  image: string;
-  readyInMinutes: number;
-  missedIngredientCount: number;
-}
-
-interface AiRecipe {
-  name: string;
-  description: string;
-}
-
-interface AiSuggestions {
-  recipes: AiRecipe[];
-}
-
 export default function CookPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,7 +42,7 @@ export default function CookPage() {
     if (initialIngredients.length > 0) {
       restoreScrollPosition();
     }
-  }, []);
+  }, [initialIngredients.length]);
 
   const updateSearchParams = (ingredients: string[]) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -186,7 +169,7 @@ export default function CookPage() {
                       <p className="mt-4 text-gray-600">Our AI chef is thinking...</p>
                     </div>
                   ) : aiSuggestions.length > 0 ? (
-                    aiSuggestions.map((recipe, index) => (
+                    aiSuggestions.map((recipe: { name: string; description: string }, index: number) => (
                       <div 
                         key={index}
                         className="p-4 border border-grapefruit/10 rounded-lg hover:border-grapefruit/30 transition-all hover:shadow-md"
