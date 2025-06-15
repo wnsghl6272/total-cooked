@@ -2,9 +2,16 @@
   "version": "0.2",
   "language": "en",
   "words": [
-    "Spoonacular",
-    "spoonacular",
-    "SPOONACULAR"
+    "openai",
+    "supabase",
+    "totalcook",
+    "optimizers",
+    "nofilter",
+    "grayscale",
+    "blendmode",
+    "typeof",
+    "strikethrough",
+    "Tailwindcss"
   ],
   "ignorePaths": [
     "node_modules/**",

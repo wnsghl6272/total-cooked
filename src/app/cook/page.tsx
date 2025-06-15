@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import IngredientInput from '@/components/IngredientInput';
 import ImageUpload from '@/components/ImageUpload';
-import RecipeSuggestions from '@/components/RecipeSuggestions';
 import { useRecipeSearch } from '@/hooks/useRecipeSearch';
 import { saveScrollPosition, restoreScrollPosition } from '@/utils/scrollPosition';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,7 +25,6 @@ export default function CookPage() {
 
   // Use React Query for data fetching
   const { data, isLoading } = useRecipeSearch(searchedIngredients);
-  const recipes = data?.recipes || [];
   const aiSuggestions = data?.aiSuggestions || [];
 
   // Load search count from localStorage
@@ -105,23 +103,23 @@ export default function CookPage() {
   return (
     <main className="min-h-screen bg-grapefruit-light/20">
       <Head>
-        <title>Cook Page - Your Recipe Finder</title>
-        <meta name="description" content="Find the best recipes based on the ingredients you have at home." />
-        <meta name="keywords" content="recipes, cooking, ingredients, food, AI suggestions" />
-        <meta property="og:title" content="Cook Page - Your Recipe Finder" />
-        <meta property="og:description" content="Find the best recipes based on the ingredients you have at home." />
+        <title>AI Chef - Your Personal Recipe Creator</title>
+        <meta name="description" content="Get personalized recipe suggestions from our AI Chef based on your ingredients." />
+        <meta name="keywords" content="AI chef, cooking, recipes, ingredients, food, personalized recipes" />
+        <meta property="og:title" content="AI Chef - Your Personal Recipe Creator" />
+        <meta property="og:description" content="Get personalized recipe suggestions from our AI Chef based on your ingredients." />
         <meta property="og:image" content="/path/to/your/image.jpg" />
         <meta property="og:url" content="https://yourwebsite.com/cook" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Cook Page - Your Recipe Finder" />
-        <meta name="twitter:description" content="Find the best recipes based on the ingredients you have at home." />
+        <meta name="twitter:title" content="AI Chef - Your Personal Recipe Creator" />
+        <meta name="twitter:description" content="Get personalized recipe suggestions from our AI Chef based on your ingredients." />
         <meta name="twitter:image" content="/path/to/your/image.jpg" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Cook Page - Your Recipe Finder",
-            "description": "Find the best recipes based on the ingredients you have at home.",
+            "name": "AI Chef - Your Personal Recipe Creator",
+            "description": "Get personalized recipe suggestions from our AI Chef based on your ingredients.",
             "url": "https://yourwebsite.com/cook",
             "image": "/path/to/your/image.jpg"
           })}
@@ -150,36 +148,60 @@ export default function CookPage() {
             <ImageUpload onIngredientsDetected={handleIngredientsFromImage} />
           </div>
 
-          {/* Right Column - Recipe Suggestions */}
+          {/* Right Column - AI Chef Suggestions */}
           <div className="space-y-6">
-            <RecipeSuggestions
-              searchedIngredients={searchedIngredients}
-              isLoading={isLoading}
-              recipes={recipes}
-            />
-
-            {/* AI Recipe Suggestions */}
             {searchedIngredients.length > 0 && (
               <div className="bg-white p-6 rounded-xl shadow-sm">
-                <h2 className="text-2xl font-semibold mb-6 text-gray-900">AI Chef Suggestions</h2>
+                <div className="flex items-center mb-6">
+                  <span className="text-grapefruit mr-3">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </span>
+                  <h2 className="text-2xl font-semibold text-gray-900">AI Chef's Special Recommendations</h2>
+                </div>
+
+                {/* Display searched ingredients */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Creating recipes with:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {searchedIngredients.map((ingredient, index) => (
+                      <span 
+                        key={index}
+                        className="bg-grapefruit-light text-grapefruit-dark px-3 py-1 rounded-full text-sm"
+                      >
+                        {ingredient}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-6">
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="w-12 h-12 border-4 border-grapefruit border-t-transparent rounded-full animate-spin mx-auto"></div>
-                      <p className="mt-4 text-gray-600">Our AI chef is thinking...</p>
+                      <p className="mt-4 text-gray-600">Our AI chef is crafting personalized recipes...</p>
                     </div>
                   ) : aiSuggestions.length > 0 ? (
                     aiSuggestions.map((recipe: { name: string; description: string }, index: number) => (
                       <div 
                         key={index}
-                        className="p-4 border border-grapefruit/10 rounded-lg hover:border-grapefruit/30 transition-all hover:shadow-md"
+                        className="p-6 border border-grapefruit/10 rounded-lg hover:border-grapefruit/30 transition-all hover:shadow-md cursor-pointer"
+                        onClick={() => router.push(`/recipe/ai/${encodeURIComponent(recipe.name.toLowerCase().replace(/\s+/g, '-'))}?ingredients=${searchedIngredients.join(',')}`)}
                       >
-                        <h3 className="font-semibold text-lg text-grapefruit mb-2">
-                          {recipe.name}
-                        </h3>
+                        <div className="flex items-center mb-3">
+                          <h3 className="font-semibold text-lg text-grapefruit">
+                            {recipe.name}
+                          </h3>
+                        </div>
                         <p className="text-gray-600 text-sm">
                           {recipe.description}
                         </p>
+                        <div className="mt-4 flex justify-end">
+                          <span className="text-sm text-grapefruit hover:text-grapefruit-dark">
+                            View Recipe →
+                          </span>
+                        </div>
                       </div>
                     ))
                   ) : (

@@ -66,18 +66,25 @@ export async function GET(request: Request) {
       messages: [
         {
           role: "system",
-          content: "You are a professional chef who can suggest creative and delicious recipes based on available ingredients. Provide recipes in a structured format with name and brief description."
+          content: "You are a professional chef who can suggest creative and delicious recipes based on available ingredients. Always respond with a valid JSON object containing an array of recipes under the 'recipes' key."
         },
         {
           role: "user",
-          content: `Suggest 3 creative recipes I can make with these ingredients: ${ingredients}. 
-          Format each recipe as a JSON object with 'name' and 'description' fields. 
-          Return them in an array.`
+          content: `Suggest 5 creative recipes I can make with these ingredients: ${ingredients}. 
+          Return a JSON object with this exact structure:
+          {
+            "recipes": [
+              {
+                "name": "Recipe Name",
+                "description": "Brief description"
+              }
+            ]
+          }`
         }
       ],
       model: "gpt-3.5-turbo",
       temperature: 0.7,
-      response_format: { type: "json_object" },
+      max_tokens: 1000
     });
 
     if (!completion.choices[0].message.content) {

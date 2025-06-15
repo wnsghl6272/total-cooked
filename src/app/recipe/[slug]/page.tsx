@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { extractRecipeId } from '@/utils/urlUtils';
 import Head from 'next/head';
+import RecipeImages from '@/components/RecipeImages';
+import OptimizedRecipeImage from '@/components/OptimizedRecipeImage';
 
 interface Ingredient {
   id: number;
@@ -76,21 +77,51 @@ export default function RecipeDetailPage() {
   ]);
 
   useEffect(() => {
-    const fetchRecipeDetails = async () => {
+    const generateMockRecipe = () => {
       try {
-        const recipeId = extractRecipeId(params.slug as string);
-        const response = await fetch(`/api/recipes/${recipeId}`);
-        const data = await response.json();
-        setRecipe(data);
+        const slug = params.slug as string;
+        const recipeName = slug.split('-').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+
+        // 목업 레시피 데이터 생성
+        const mockRecipe: RecipeDetail = {
+          id: Math.floor(Math.random() * 1000),
+          title: recipeName,
+          image: '/food1.jpg', // 로컬 이미지 사용
+          servings: 4,
+          readyInMinutes: 30,
+          healthScore: 85,
+          pricePerServing: 250, // cents
+          summary: `Delicious ${recipeName.toLowerCase()} recipe with amazing flavors and easy-to-follow instructions.`,
+          instructions: `Follow these simple steps to make ${recipeName.toLowerCase()}.`,
+          analyzedInstructions: [{
+            steps: [
+              { number: 1, step: 'Prepare all ingredients and wash them thoroughly.' },
+              { number: 2, step: 'Heat oil in a large pan over medium heat.' },
+              { number: 3, step: 'Add ingredients and cook according to recipe.' },
+              { number: 4, step: 'Season with salt and pepper to taste.' },
+              { number: 5, step: 'Serve hot and enjoy!' }
+            ]
+          }],
+          extendedIngredients: [
+            { id: 1, name: 'Main ingredient', amount: 2, unit: 'cups', image: 'ingredient1.jpg' },
+            { id: 2, name: 'Seasoning', amount: 1, unit: 'tsp', image: 'ingredient2.jpg' },
+            { id: 3, name: 'Oil', amount: 2, unit: 'tbsp', image: 'ingredient3.jpg' },
+            { id: 4, name: 'Vegetables', amount: 1, unit: 'cup', image: 'ingredient4.jpg' }
+          ]
+        };
+
+        setRecipe(mockRecipe);
       } catch (error) {
-        console.error('Error fetching recipe details:', error);
+        console.error('Error generating mock recipe:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (params.slug) {
-      fetchRecipeDetails();
+      generateMockRecipe();
     }
   }, [params.slug]);
 
@@ -147,14 +178,17 @@ export default function RecipeDetailPage() {
         <Navbar />
         
         {/* Hero Section */}
-        <div className="relative h-[60vh] w-full">
-          <Image
-            src={recipe.image}
-            alt={recipe.title}
-            fill
-            className="object-cover"
-            priority
-          />
+        <div className="relative w-full bg-blue-500 flex items-center justify-center" style={{ height: '60vh' }}>
+          <div className="text-white text-center">
+            <h2 className="text-2xl mb-4">레시피 이미지 테스트</h2>
+            <img
+              src="/mainfoodimage.jpg"
+              alt={recipe.title}
+              className="max-w-md max-h-64 object-cover border-4 border-white"
+              onLoad={() => console.log('✅ Image loaded!')}
+              onError={() => console.log('❌ Image failed to load!')}
+            />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
             <div className="max-w-7xl mx-auto">
@@ -185,6 +219,9 @@ export default function RecipeDetailPage() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Recipe Images */}
+          <RecipeImages />
+          
           {/* Summary */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div dangerouslySetInnerHTML={{ __html: recipe.summary }} className="prose max-w-none" />
@@ -237,7 +274,7 @@ export default function RecipeDetailPage() {
                         <div key={ingredient.id} className="flex items-center">
                           <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-gray-100">
                             <Image
-                              src={`https://spoonacular.com/cdn/ingredients_100x100/${ingredient.image}`}
+                              src="/food1.jpg"
                               alt={ingredient.name}
                               fill
                               className="object-cover"
@@ -262,7 +299,7 @@ export default function RecipeDetailPage() {
                           <div key={ingredient.id} className="flex items-center">
                             <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-gray-100">
                               <Image
-                                src={`https://spoonacular.com/cdn/ingredients_100x100/${ingredient.image}`}
+                                src="/food2.png"
                                 alt={ingredient.name}
                                 fill
                                 className="object-cover"
