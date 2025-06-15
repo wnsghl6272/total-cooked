@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@supabase/supabase-js';
-import Image from 'next/image';
 import Link from 'next/link';
 
 
@@ -19,11 +18,13 @@ interface RecipeCache {
   id: string;
   cache_key: string;
   recipe_data: {
-    title: string;
-    description: string;
-    prepTime: string;
-    cookTime: string;
-    ingredients: { name: string; amount: string; unit: string }[];
+    title?: string;
+    description?: string;
+    prepTime?: string;
+    cookTime?: string;
+    ingredients?: { name: string; amount: string; unit: string }[];
+    // Support for old format
+    [key: string]: unknown;
   };
   created_at: string;
 }
@@ -54,7 +55,7 @@ export default function RecipesBlogPage() {
           .from('recipe_cache')
           .select('*');
 
-        const result = await Promise.race([supabasePromise, timeoutPromise]) as { data: any; error: any };
+        const result = await Promise.race([supabasePromise, timeoutPromise]) as { data: RecipeCache[] | null; error: Error | null };
         const { data, error } = result;
 
         if (error) {
@@ -76,7 +77,7 @@ export default function RecipesBlogPage() {
         // Shuffle recipes randomly
         const shuffledData = data.sort(() => Math.random() - 0.5);
         
-        const recipesWithImageState = shuffledData.map((recipe: any) => ({
+        const recipesWithImageState = shuffledData.map((recipe: RecipeCache) => ({
           ...recipe,
           imageLoading: false,
           imageUrl: '',
@@ -88,10 +89,10 @@ export default function RecipesBlogPage() {
         // Load cached images for each recipe from dalle_cache table
         console.log(`📊 Starting to load ${recipesWithImageState.length} recipe images...`);
         
-        recipesWithImageState.forEach(async (recipe: any, index: number) => {
+        recipesWithImageState.forEach(async (recipe: RecipeWithImage, index: number) => {
           try {
             const recipeTitle = extractRecipeTitle(recipe.cache_key);
-            console.log(`🖼️ Looking for cached image for: "${recipeTitle}" (cache_key: ${recipe.cache_key})`);
+            console.log(`🖼️ [${index + 1}/${recipesWithImageState.length}] Looking for cached image for: "${recipeTitle}" (cache_key: ${recipe.cache_key})`);
             
             // Try exact match first
             let { data: cachedImage, error } = await supabase
@@ -99,6 +100,8 @@ export default function RecipesBlogPage() {
               .select('*')
               .eq('recipe_title', recipeTitle)
               .single();
+            
+            console.log(`🔍 Exact match result:`, { found: !!cachedImage, error: error?.message });
 
             // If exact match fails, try variations
             if (error && error.code === 'PGRST116') {
@@ -133,13 +136,31 @@ export default function RecipesBlogPage() {
             if (!error && cachedImage) {
               console.log(`✅ Found cached image for: ${recipeTitle}`);
               try {
-                const imageData = typeof cachedImage.image_data === 'string'
-                  ? JSON.parse(cachedImage.image_data)
-                  : cachedImage.image_data;
-                imageUrl = imageData?.url || '';
-                console.log(`📸 Image URL: ${imageUrl.substring(0, 50)}...`);
+                let imageData;
+                if (typeof cachedImage.image_data === 'string') {
+                  imageData = JSON.parse(cachedImage.image_data);
+                } else {
+                  imageData = cachedImage.image_data;
+                }
+                
+                // Handle different image data formats
+                if (imageData?.url) {
+                  imageUrl = imageData.url;
+                } else if (imageData?.urls?.regular) {
+                  // Handle Unsplash format
+                  imageUrl = imageData.urls.regular;
+                } else if (Array.isArray(imageData) && imageData.length > 0) {
+                  // Handle array format
+                  imageUrl = imageData[0]?.url || imageData[0]?.urls?.regular || '';
+                }
+                
+                if (imageUrl) {
+                  console.log(`📸 Image URL: ${imageUrl.substring(0, 50)}...`);
+                } else {
+                  console.log(`⚠️ Image data found but no valid URL extracted:`, imageData);
+                }
               } catch (parseError) {
-                console.error('Error parsing cached image data:', parseError);
+                console.error('Error parsing cached image data:', parseError, cachedImage.image_data);
               }
             } else {
               console.log(`❌ No cached image found for: ${recipeTitle}`, error);
@@ -171,10 +192,7 @@ export default function RecipesBlogPage() {
     fetchRecipes();
   }, []);
 
-  // Generate URL-friendly slug from cache_key
-  const generateSlug = (cacheKey: string) => {
-    return cacheKey.replace('recipe_', '').toLowerCase();
-  };
+
 
   // Extract recipe title from cache_key
   const extractRecipeTitle = (cacheKey: string) => {
@@ -221,10 +239,9 @@ export default function RecipesBlogPage() {
                   <div className="aspect-w-16 aspect-h-9 bg-gray-100">
                     <div className="w-full h-48 relative">
                       {recipe.imageUrl ? (
-                        <img
-                          src={recipe.imageUrl}
-                          alt={extractRecipeTitle(recipe.cache_key)}
-                          className="w-full h-full object-cover"
+                        <div 
+                          className="w-full h-full bg-cover bg-center"
+                          style={{ backgroundImage: `url(${recipe.imageUrl})` }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-grapefruit to-grapefruit-dark flex items-center justify-center">
@@ -247,25 +264,31 @@ export default function RecipesBlogPage() {
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <div className="flex items-center space-x-4">
-                        <span className="flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {recipe.recipe_data.prepTime}
-                        </span>
-                        <span className="flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
-                          </svg>
-                          {recipe.recipe_data.cookTime}
-                        </span>
+                        {recipe.recipe_data.prepTime && (
+                          <span className="flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {recipe.recipe_data.prepTime}
+                          </span>
+                        )}
+                        {recipe.recipe_data.cookTime && (
+                          <span className="flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+                            </svg>
+                            {recipe.recipe_data.cookTime}
+                          </span>
+                        )}
                       </div>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        {recipe.recipe_data.ingredients.length} ingredients
-                      </span>
+                      {recipe.recipe_data.ingredients && (
+                        <span className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          {recipe.recipe_data.ingredients.length} ingredients
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
