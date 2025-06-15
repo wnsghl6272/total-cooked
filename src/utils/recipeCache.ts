@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { RecipeData } from '@/types/supabase';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,12 +11,12 @@ const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24시간 (레시피 캐시)
 export interface RecipeCache {
   id: string;
   cache_key: string;
-  recipe_data: any;
+  recipe_data: RecipeData;
   created_at: string;
   updated_at: string;
 }
 
-export async function getCachedRecipe(cacheKey: string): Promise<any | null> {
+export async function getCachedRecipe(cacheKey: string): Promise<RecipeData | null> {
   try {
     console.log('Checking Supabase cache for recipe:', cacheKey);
     
@@ -54,7 +55,7 @@ export async function getCachedRecipe(cacheKey: string): Promise<any | null> {
   }
 }
 
-export async function setCachedRecipe(cacheKey: string, recipeData: any): Promise<void> {
+export async function setCachedRecipe(cacheKey: string, recipeData: RecipeData): Promise<void> {
   try {
     console.log('Storing recipe in Supabase cache:', cacheKey);
     

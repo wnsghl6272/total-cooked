@@ -117,7 +117,7 @@ export default function AIRecipeDetailPage() {
     if (params.slug) {
       fetchRecipe();
     }
-  }, [params.slug]);
+  }, [params.slug]); // loadCachedImages는 useCallback으로 메모이제이션되어 있음
 
   const loadCachedImages = useCallback(async (recipeTitle: string) => {
     try {
@@ -482,7 +482,7 @@ export default function AIRecipeDetailPage() {
               }`}
               onClick={() => setActiveTab('tips')}
             >
-              Chef's Tips
+              Chef&apos;s Tips
             </button>
           </div>
 
@@ -520,7 +520,7 @@ export default function AIRecipeDetailPage() {
 
                 {activeTab === 'tips' && (
                   <div className="space-y-4">
-                    <h2 className="text-xl font-semibold mb-4">Chef's Tips</h2>
+                    <h2 className="text-xl font-semibold mb-4">Chef&apos;s Tips</h2>
                     <ul className="space-y-3">
                       {recipe.tips.map((tip, index) => (
                         <li key={index} className="flex items-start">

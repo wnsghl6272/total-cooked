@@ -14,7 +14,8 @@
     "Tailwindcss",
     "mainfoodimage",
     "dalle",
-    "Dalle"
+    "Dalle",
+    "DALL"
   ],
   "ignorePaths": [
     "node_modules/**",

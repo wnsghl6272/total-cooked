@@ -78,8 +78,6 @@ function createRandomFoodPrompt(query: string): string {
 }
 
 export async function generateRecipeImage(recipeTitle: string): Promise<DalleImage | null> {
-  const cacheKey = `dalle:recipe:${recipeTitle.toLowerCase().trim()}`;
-
   try {
     // Check OpenAI API key
     if (!process.env.OPENAI_API_KEY) {
@@ -171,8 +169,6 @@ export async function generateRecipeImage(recipeTitle: string): Promise<DalleIma
 }
 
 export async function generateRandomFoodImage(query: string): Promise<DalleImage | null> {
-  const cacheKey = `dalle:random:${query.toLowerCase().trim()}`;
-
   try {
     // Check OpenAI API key
     if (!process.env.OPENAI_API_KEY) {
