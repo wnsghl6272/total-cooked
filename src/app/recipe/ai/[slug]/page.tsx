@@ -1,10 +1,10 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import Head from 'next/head';
-import TestRecipeImage from '@/components/TestRecipeImage';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -44,7 +44,6 @@ export default function AIRecipeDetailPage() {
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'tips'>('ingredients');
   const [heroImage, setHeroImage] = useState('');
   const [galleryImages, setGalleryImages] = useState(['', '']);
-  const [imageLoading, setImageLoading] = useState(false);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -120,7 +119,7 @@ export default function AIRecipeDetailPage() {
     }
   }, [params.slug]);
 
-  const loadCachedImages = async (recipeTitle: string) => {
+  const loadCachedImages = useCallback(async (recipeTitle: string) => {
     try {
       console.log(`🖼️ Loading cached images for: ${recipeTitle}`);
       
@@ -195,11 +194,11 @@ export default function AIRecipeDetailPage() {
       console.error('Error loading cached images:', error);
       loadDalleImages(recipeTitle);
     }
-  };
+  }, []);
 
   const loadDalleImages = async (recipeTitle: string) => {
     try {
-      setImageLoading(true);
+      console.log('🎨 Starting DALL-E image generation...');
       
       // 첫 번째 이미지 (메인 레시피 이미지)
       console.log(`🎨 Loading main DALL-E image for: ${recipeTitle}`);
@@ -232,18 +231,16 @@ export default function AIRecipeDetailPage() {
              } catch (error) {
                console.error('❌ Error loading variation:', error);
              } finally {
-               setImageLoading(false);
+               console.log('✅ Variation image generation completed');
              }
            }, 2000);
          }
        } else {
          console.log(`❌ Main DALL-E API failed: ${mainResponse.status}`);
-         setImageLoading(false);
        }
       
     } catch (error) {
       console.error('❌ Error loading main DALL-E image:', error);
-      setImageLoading(false);
     }
   };
 
@@ -344,10 +341,13 @@ export default function AIRecipeDetailPage() {
         {/* Hero Section with Main Recipe Image */}
         <div className="relative w-full bg-gray-900" style={{ height: '60vh' }}>
           {heroImage ? (
-            <img
+            <Image
               src={heroImage}
               alt={recipe.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority
+              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -394,10 +394,12 @@ export default function AIRecipeDetailPage() {
               <div className="relative group">
                 <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden bg-gray-200">
                   {galleryImages[0] ? (
-                    <img
+                    <Image
                       src={galleryImages[0]}
                       alt={recipe.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -422,10 +424,12 @@ export default function AIRecipeDetailPage() {
               <div className="relative group">
                 <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden bg-gray-200">
                   {galleryImages[1] ? (
-                    <img
+                    <Image
                       src={galleryImages[1]}
                       alt={`${recipe.title} variation`}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
