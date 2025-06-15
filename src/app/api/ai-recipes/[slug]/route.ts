@@ -13,8 +13,8 @@ interface RecipeDetails {
   servings: number;
   ingredients: Array<{name: string; amount: string; unit: string}>;
   instructions: Array<{step: number; text: string}>;
-  nutritionFacts: {calories: number; protein: number; carbs: number; fat: number};
-  tips: string[];
+  nutritionFacts?: {calories: number; protein: number; carbs: number; fat: number};
+  tips?: string[];
 }
 
 async function generateRecipeDetails(title: string, ingredients: string[]): Promise<RecipeDetails> {
@@ -25,7 +25,23 @@ async function generateRecipeDetails(title: string, ingredients: string[]): Prom
   const cachedRecipe = await getCachedRecipe(cacheKey);
   if (cachedRecipe) {
     console.log('Cache hit for recipe:', title);
-    return cachedRecipe;
+    // Ensure cached recipe has required fields with defaults
+    const recipeDetails: RecipeDetails = {
+      description: cachedRecipe.description || 'AI-generated recipe',
+      prepTime: cachedRecipe.prepTime || '30 mins',
+      cookTime: cachedRecipe.cookTime || '30 mins',
+      servings: cachedRecipe.servings || 4,
+      ingredients: cachedRecipe.ingredients || [],
+      instructions: cachedRecipe.instructions || [],
+      nutritionFacts: cachedRecipe.nutritionFacts || {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0
+      },
+      tips: cachedRecipe.tips || []
+    };
+    return recipeDetails;
   }
 
   try {
@@ -97,14 +113,19 @@ export async function GET(
       prepTime: recipeDetails.prepTime,
       cookTime: recipeDetails.cookTime,
       servings: recipeDetails.servings,
-      ingredients: recipeDetails.ingredients.map((ing) => ({
+      ingredients: recipeDetails.ingredients?.map((ing) => ({
         name: ing.name,
         amount: ing.amount,
         unit: ing.unit
-      })),
-      instructions: recipeDetails.instructions,
-      nutritionFacts: recipeDetails.nutritionFacts,
-      tips: recipeDetails.tips
+      })) || [],
+      instructions: recipeDetails.instructions || [],
+      nutritionFacts: recipeDetails.nutritionFacts || {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0
+      },
+      tips: recipeDetails.tips || []
     };
 
     return NextResponse.json(recipe);
