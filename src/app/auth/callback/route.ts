@@ -1,17 +1,17 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { RequestCookies } from 'next/dist/server/web/spec-extension/cookies';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
-  const next = requestUrl.searchParams.get('next') ?? '/';
+export async function GET(request: NextRequest) {
+  const code = request.nextUrl.searchParams.get('code');
+  const next = request.nextUrl.searchParams.get('next') ?? '/';
 
   if (code) {
-    const response = NextResponse.redirect(new URL(next, request.url));
+    const response = NextResponse.redirect(new URL(next, request.nextUrl.origin));
     const cookieStore = cookies() as unknown as RequestCookies;
 
     const supabase = createServerClient(
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       response.cookies.delete('code_verifier');
       
       // Add error details to the redirect URL
-      const errorUrl = new URL('/auth/error', request.url);
+      const errorUrl = new URL('/auth/error', request.nextUrl.origin);
       if (error instanceof Error) {
         errorUrl.searchParams.set('message', error.message);
       }
@@ -89,5 +89,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  return NextResponse.redirect(new URL(next, request.nextUrl.origin));
 } 

@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
 
 const TIMEOUT = 30000; // 30 seconds
 const MAX_INGREDIENTS = 20;
@@ -35,8 +38,8 @@ type ApiResponse = {
   recipes: Recipe[];
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
   const ingredients = searchParams.get('ingredients');
 
   try {

@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { getCachedRecipe, setCachedRecipe } from '@/utils/recipeCache';
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -93,7 +96,7 @@ async function generateRecipeDetails(title: string, ingredients: string[]): Prom
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
@@ -101,8 +104,7 @@ export async function GET(
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
 
-    const url = new URL(request.url);
-    const ingredientsParam = url.searchParams.get('ingredients');
+    const ingredientsParam = request.nextUrl.searchParams.get('ingredients');
     const ingredients = ingredientsParam ? ingredientsParam.split(',') : [];
 
     const recipeDetails = await generateRecipeDetails(title, ingredients);
