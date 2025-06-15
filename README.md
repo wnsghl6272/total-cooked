@@ -20,6 +20,45 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Hero Image Pool Management
+
+This application uses a pre-cached pool of 5 hero images to improve performance and reduce DALL-E API costs. The images rotate automatically for each page load.
+
+### Commands
+
+```bash
+# Check current hero image pool status
+npm run hero:status
+
+# Initialize hero image pool (first time setup)
+npm run hero:init
+
+# Refresh all hero images (generates new set)
+npm run hero:refresh
+```
+
+### Setup
+
+1. Ensure your `.env.local` file has the required OpenAI API key:
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
+
+2. Initialize the hero image pool:
+   ```bash
+   npm run hero:init
+   ```
+
+### How It Works
+
+- **Pool Size**: 5 pre-generated hero images
+- **Cache Duration**: 30 days (Redis + Supabase)
+- **Rotation**: Sequential rotation through all images
+- **Auto-refresh**: Images older than 30 days are refreshed automatically
+- **Fallback**: Falls back to static image if generation fails
+
+The hero images are cached in both Redis (fast access) and Supabase (persistent storage) for optimal performance.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

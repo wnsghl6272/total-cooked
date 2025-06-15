@@ -2,22 +2,23 @@ import Image from "next/image";
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Head from 'next/head';
+import OptimizedHeroSection from '@/components/OptimizedHeroSection';
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col scroll-smooth">
       <Head>
         <title>totallyCooked - Transform Ingredients into Delicious Meals</title>
         <meta name="description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
         <meta name="keywords" content="recipes, cooking, AI, ingredients, food, meal planning" />
         <meta property="og:title" content="totallyCooked - Transform Ingredients into Delicious Meals" />
         <meta property="og:description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
-        <meta property="og:image" content="/path/to/your/image.jpg" />
+        <meta property="og:image" content="/mainfoodimage.jpg" />
         <meta property="og:url" content="https://yourwebsite.com" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="totallyCooked - Transform Ingredients into Delicious Meals" />
         <meta name="twitter:description" content="Use AI to turn your ingredients into delicious meals with personalized recipe suggestions." />
-        <meta name="twitter:image" content="/path/to/your/image.jpg" />
+        <meta name="twitter:image" content="/mainfoodimage.jpg" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -25,47 +26,15 @@ export default function Home() {
             "name": "totallyCooked - Transform Ingredients into Delicious Meals",
             "description": "Use AI to turn your ingredients into delicious meals with personalized recipe suggestions.",
             "url": "https://yourwebsite.com",
-            "image": "/path/to/your/image.jpg"
+            "image": "/mainfoodimage.jpg"
           })}
         </script>
         <link rel="canonical" href="https://yourwebsite.com" />
       </Head>
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative h-screen">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <Image
-            src="/mainfoodimage.jpg"
-            alt="Delicious Food Background"
-            fill
-            className="object-cover"
-            priority
-          />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/50" />
-        </div>
-
-        {/* Content */}
-        <div className="relative h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-7xl font-bold text-white mb-6">
-              Turn Your Ingredients into
-              <span className="text-grapefruit"> Delicious Meals</span>
-            </h1>
-            <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              Simply input your ingredients or upload a photo, and our AI will identify them instantly. Get personalized recipe suggestions with detailed instructions and video guides.
-            </p>
-            <Link 
-              href="/cook" 
-              className="bg-grapefruit text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-grapefruit-dark transition-colors inline-block"
-            >
-              Start Cooking
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Now loads instantly with static images */}
+      <OptimizedHeroSection />
 
       {/* Features Grid */}
       <section className="py-20">
@@ -103,7 +72,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="how-it-works" className="py-20 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-12">

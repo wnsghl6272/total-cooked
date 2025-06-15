@@ -1,32 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 
-interface Recipe {
-  id: number;
-  title: string;
-  image: string;
-  readyInMinutes: number;
-  missedIngredientCount: number;
-}
-
-interface AiRecipe {
+interface AIRecipe {
   name: string;
   description: string;
 }
 
-async function fetchRecipes(ingredients: string[]): Promise<{ recipes: Recipe[], aiSuggestions: AiRecipe[] }> {
-  if (!ingredients.length) return { recipes: [], aiSuggestions: [] };
+async function fetchRecipes(ingredients: string[]): Promise<{ aiSuggestions: AIRecipe[] }> {
+  if (!ingredients.length) return { aiSuggestions: [] };
   
-  const [recipesResponse, aiResponse] = await Promise.all([
-    fetch(`/api/recipes?ingredients=${ingredients.join(',')}`),
-    fetch(`/api/ai-suggestions?ingredients=${ingredients.join(',')}`)
-  ]);
-
-  const recipes = await recipesResponse.json();
-  const aiSuggestions = await aiResponse.json();
+  const response = await fetch(`/api/ai-suggestions?ingredients=${ingredients.join(',')}`);
+  const data = await response.json();
 
   return {
-    recipes,
-    aiSuggestions: aiSuggestions.recipes
+    aiSuggestions: data.recipes || []
   };
 }
 
