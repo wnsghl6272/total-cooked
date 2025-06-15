@@ -6,7 +6,18 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function generateRecipeDetails(title: string, ingredients: string[]): Promise<any> {
+interface RecipeDetails {
+  description: string;
+  prepTime: string;
+  cookTime: string;
+  servings: number;
+  ingredients: Array<{name: string; amount: string; unit: string}>;
+  instructions: Array<{step: number; text: string}>;
+  nutritionFacts: {calories: number; protein: number; carbs: number; fat: number};
+  tips: string[];
+}
+
+async function generateRecipeDetails(title: string, ingredients: string[]): Promise<RecipeDetails> {
   // Create cache key from title and ingredients
   const cacheKey = `${title}-${ingredients.sort().join(',')}`;
   
@@ -86,7 +97,7 @@ export async function GET(
       prepTime: recipeDetails.prepTime,
       cookTime: recipeDetails.cookTime,
       servings: recipeDetails.servings,
-      ingredients: recipeDetails.ingredients.map((ing: any) => ({
+      ingredients: recipeDetails.ingredients.map((ing) => ({
         name: ing.name,
         amount: ing.amount,
         unit: ing.unit

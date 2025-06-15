@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Head from 'next/head';
 import RecipeImages from '@/components/RecipeImages';
-import OptimizedRecipeImage from '@/components/OptimizedRecipeImage';
+
 
 interface Ingredient {
   id: number;
@@ -181,9 +181,11 @@ export default function RecipeDetailPage() {
         <div className="relative w-full bg-blue-500 flex items-center justify-center" style={{ height: '60vh' }}>
           <div className="text-white text-center">
             <h2 className="text-2xl mb-4">레시피 이미지 테스트</h2>
-            <img
+            <Image
               src="/mainfoodimage.jpg"
               alt={recipe.title}
+              width={400}
+              height={256}
               className="max-w-md max-h-64 object-cover border-4 border-white"
               onLoad={() => console.log('✅ Image loaded!')}
               onError={() => console.log('❌ Image failed to load!')}

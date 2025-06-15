@@ -11,7 +11,10 @@
     "blendmode",
     "typeof",
     "strikethrough",
-    "Tailwindcss"
+    "Tailwindcss",
+    "mainfoodimage",
+    "dalle",
+    "Dalle"
   ],
   "ignorePaths": [
     "node_modules/**",
